@@ -204,7 +204,7 @@ function renderBookmarks(bookmarks) {
         deleteBtn.title = 'Remove Bookmark';
         deleteBtn.appendChild(createDeleteIcon());
 
-        deleteBtn.addEventListener('click', async () => {
+        deleteBtn.addEventListener('click', async (_event) => {
             deleteBtn.disabled = true;
             try {
                 await new Promise((resolve, reject) => {
