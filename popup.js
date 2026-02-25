@@ -142,24 +142,37 @@ function renderBookmarks(bookmarks) {
         const li = document.createElement('li');
         li.className = 'bookmark-item';
 
-        li.innerHTML = `
-      <div class="bookmark-info">
-        <h3 title="${bm.title || bm.url}">${bm.title || 'Untitled'}</h3>
-        <a href="${bm.url}" target="_blank" class="bookmark-url" title="${bm.url}">${bm.url}</a>
-        <span class="bookmark-error">${bm.reason || 'Error'}</span>
-      </div>
-      <button class="delete-btn" data-id="${bm.id}" title="Remove Bookmark">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>
-      </button>
-    `;
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'bookmark-info';
 
-        li.querySelector('.delete-btn').addEventListener('click', async (e) => {
-            e.preventDefault();
-            e.stopPropagation();
+        const titleEl = document.createElement('h3');
+        titleEl.title = bm.title || bm.url;
+        titleEl.textContent = bm.title || 'Untitled';
 
-            const btn = e.currentTarget;
-            btn.disabled = true;
+        const linkEl = document.createElement('a');
+        linkEl.href = bm.url;
+        linkEl.target = '_blank';
+        linkEl.rel = 'noopener noreferrer';
+        linkEl.className = 'bookmark-url';
+        linkEl.title = bm.url;
+        linkEl.textContent = bm.url;
 
+        const reasonEl = document.createElement('span');
+        reasonEl.className = 'bookmark-error';
+        reasonEl.textContent = bm.reason || 'Error';
+
+        infoDiv.appendChild(titleEl);
+        infoDiv.appendChild(linkEl);
+        infoDiv.appendChild(reasonEl);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.dataset.id = bm.id;
+        deleteBtn.title = 'Remove Bookmark';
+        deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
+
+        deleteBtn.addEventListener('click', async () => {
+            deleteBtn.disabled = true;
             try {
                 await new Promise((resolve, reject) => {
                     chrome.bookmarks.remove(bm.id, () => {
@@ -186,11 +199,13 @@ function renderBookmarks(bookmarks) {
                 }
             } catch (err) {
                 console.error('Failed to remove bookmark:', err);
-                alert(`Could not remove bookmark: ${err.message || 'It might have already been deleted.'}`);
-                btn.disabled = false;
+                alert('Could not remove bookmark. It might have already been deleted.');
+                deleteBtn.disabled = false;
             }
         });
 
+        li.appendChild(infoDiv);
+        li.appendChild(deleteBtn);
         invalidList.appendChild(li);
     });
 }
