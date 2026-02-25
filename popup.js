@@ -206,10 +206,6 @@ function renderBookmarks(bookmarks) {
 
         deleteBtn.addEventListener('click', async (event) => {
             const target = event.currentTarget;
-            if (!(target instanceof HTMLButtonElement)) {
-                return;
-            }
-
             target.disabled = true;
             try {
                 await new Promise((resolve, reject) => {
