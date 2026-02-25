@@ -163,6 +163,22 @@ async function startValidation() {
 
     // Save invalid bookmarks
     await chrome.storage.local.set({ [INVALID_BOOKMARKS_KEY]: invalidBookmarks });
+
+    const count = invalidBookmarks.length;
+    const message = count === 0
+      ? 'All bookmarks are valid!'
+      : `Found ${count} invalid bookmark${count === 1 ? '' : 's'}.`;
+
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'Bookmark Validation Complete',
+      message
+    }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('Notification error:', chrome.runtime.lastError.message);
+      }
+    });
   } finally {
     isCheckingLocal = false;
     await chrome.storage.local.set({ [IS_CHECKING_KEY]: false });
