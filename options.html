@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Bookmarks Validator</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="options-body">
+        <div class="header">
+            <h1>Bookmarks Validator Settings</h1>
+        </div>
+
+        <div class="options-section" style="margin-top: 2rem;">
+            <h2>Automation Settings</h2>
+            <p class="help-text" style="margin-bottom: 1.5rem;">Configure when the extension should automatically check
+                your bookmarks.</p>
+
+            <div class="form-group">
+                <label class="checkbox-label">
+                    <input type="checkbox" id="check-startup-cb">
+                    Check on browser startup
+                </label>
+                <p class="help-text">Validate bookmarks every time you open Chrome.</p>
+            </div>
+
+            <div class="form-group" style="margin-top: 1.5rem;">
+                <label for="schedule-select">Scheduled Checks</label>
+                <select id="schedule-select">
+                    <option value="0">Disabled (Manual only)</option>
+                    <option value="60">Every hour</option>
+                    <option value="1440">Every day</option>
+                    <option value="10080">Every week</option>
+                </select>
+                <p class="help-text">Automatically validate bookmarks periodically in the background.</p>
+            </div>
+        </div>
+
+        <div class="controls" style="display: flex; justify-content: flex-end; padding: 0;">
+            <button id="save-btn" class="primary-btn" style="width: auto;">Save Changes</button>
+        </div>
+
+        <div id="save-status"
+            style="color: var(--primary-color); text-align: right; margin-top: 0.5rem; display: none;">
+            Settings saved!
+        </div>
+    </div>
+
+    <script src="options.js"></script>
+</body>
+
+</html>

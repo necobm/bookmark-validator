@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bookmarks Validator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body class="popup-body">
+  <div class="header">
+    <h1>Bookmarks Validator</h1>
+    <button id="settings-btn" class="icon-btn" title="Settings">⚙️</button>
+  </div>
+
+  <div class="controls">
+    <button id="check-btn" class="primary-btn">Start Validation</button>
+  </div>
+
+  <div id="status-container" class="status hidden">
+    <div class="progress-bar">
+      <div id="progress-fill" class="progress-fill"></div>
+    </div>
+    <p id="status-text">Checking bookmarks...</p>
+  </div>
+
+  <div class="results-container">
+    <div class="results-header">
+      <h2>Invalid Bookmarks (<span id="invalid-count">0</span>)</h2>
+      <button id="clear-all-btn" class="danger-btn hidden">Delete All</button>
+    </div>
+
+    <ul id="invalid-list" class="bookmark-list">
+      <!-- Items will be injected here via JS -->
+    </ul>
+
+    <div id="empty-state" class="empty-state">
+      <p>No invalid bookmarks found!</p>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+
+</html>
