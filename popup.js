@@ -1,6 +1,7 @@
 const SETTINGS_KEY = 'validator_settings';
 const INVALID_BOOKMARKS_KEY = 'invalid_bookmarks';
 const IS_CHECKING_KEY = 'is_checking';
+const SVG_NS = 'http://www.w3.org/2000/svg';
 
 const checkBtn = document.getElementById('check-btn');
 const settingsBtn = document.getElementById('settings-btn');
@@ -125,6 +126,38 @@ function setCheckingState(isChecking) {
     }
 }
 
+function createDeleteIcon() {
+    const svgIcon = document.createElementNS(SVG_NS, 'svg');
+    svgIcon.setAttribute('width', '16');
+    svgIcon.setAttribute('height', '16');
+    svgIcon.setAttribute('viewBox', '0 0 24 24');
+    svgIcon.setAttribute('fill', 'none');
+    svgIcon.setAttribute('stroke', 'currentColor');
+    svgIcon.setAttribute('stroke-width', '2');
+    svgIcon.setAttribute('stroke-linecap', 'round');
+    svgIcon.setAttribute('stroke-linejoin', 'round');
+
+    const path1 = document.createElementNS(SVG_NS, 'path');
+    path1.setAttribute('d', 'M3 6h18');
+    const path2 = document.createElementNS(SVG_NS, 'path');
+    path2.setAttribute('d', 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6');
+    const path3 = document.createElementNS(SVG_NS, 'path');
+    path3.setAttribute('d', 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2');
+    const line1 = document.createElementNS(SVG_NS, 'line');
+    line1.setAttribute('x1', '10');
+    line1.setAttribute('y1', '11');
+    line1.setAttribute('x2', '10');
+    line1.setAttribute('y2', '17');
+    const line2 = document.createElementNS(SVG_NS, 'line');
+    line2.setAttribute('x1', '14');
+    line2.setAttribute('y1', '11');
+    line2.setAttribute('x2', '14');
+    line2.setAttribute('y2', '17');
+
+    svgIcon.append(path1, path2, path3, line1, line2);
+    return svgIcon;
+}
+
 function renderBookmarks(bookmarks) {
     invalidList.innerHTML = '';
     invalidCount.textContent = bookmarks.length;
@@ -152,7 +185,7 @@ function renderBookmarks(bookmarks) {
         const linkEl = document.createElement('a');
         linkEl.href = bm.url;
         linkEl.target = '_blank';
-        linkEl.rel = 'noopener noreferrer';
+        linkEl.rel = 'noopener';
         linkEl.className = 'bookmark-url';
         linkEl.title = bm.url;
         linkEl.textContent = bm.url;
@@ -169,36 +202,7 @@ function renderBookmarks(bookmarks) {
         deleteBtn.className = 'delete-btn';
         deleteBtn.dataset.id = bm.id;
         deleteBtn.title = 'Remove Bookmark';
-        const svgNS = 'http://www.w3.org/2000/svg';
-        const svgIcon = document.createElementNS(svgNS, 'svg');
-        svgIcon.setAttribute('width', '16');
-        svgIcon.setAttribute('height', '16');
-        svgIcon.setAttribute('viewBox', '0 0 24 24');
-        svgIcon.setAttribute('fill', 'none');
-        svgIcon.setAttribute('stroke', 'currentColor');
-        svgIcon.setAttribute('stroke-width', '2');
-        svgIcon.setAttribute('stroke-linecap', 'round');
-        svgIcon.setAttribute('stroke-linejoin', 'round');
-
-        const path1 = document.createElementNS(svgNS, 'path');
-        path1.setAttribute('d', 'M3 6h18');
-        const path2 = document.createElementNS(svgNS, 'path');
-        path2.setAttribute('d', 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6');
-        const path3 = document.createElementNS(svgNS, 'path');
-        path3.setAttribute('d', 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2');
-        const line1 = document.createElementNS(svgNS, 'line');
-        line1.setAttribute('x1', '10');
-        line1.setAttribute('y1', '11');
-        line1.setAttribute('x2', '10');
-        line1.setAttribute('y2', '17');
-        const line2 = document.createElementNS(svgNS, 'line');
-        line2.setAttribute('x1', '14');
-        line2.setAttribute('y1', '11');
-        line2.setAttribute('x2', '14');
-        line2.setAttribute('y2', '17');
-
-        svgIcon.append(path1, path2, path3, line1, line2);
-        deleteBtn.appendChild(svgIcon);
+        deleteBtn.appendChild(createDeleteIcon());
 
         deleteBtn.addEventListener('click', async () => {
             deleteBtn.disabled = true;
