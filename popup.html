@@ -40,6 +40,15 @@
     </div>
   </div>
 
+  <div class="dismissed-container">
+    <button id="dismissed-toggle" class="dismissed-toggle" aria-expanded="false">
+      Dismissed (<span id="dismissed-count">0</span>) <span class="toggle-arrow">▶</span>
+    </button>
+    <ul id="dismissed-list" class="bookmark-list hidden">
+      <!-- Dismissed items will be injected here via JS -->
+    </ul>
+  </div>
+
   <script src="popup.js"></script>
 </body>
 
