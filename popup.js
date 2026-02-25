@@ -73,19 +73,42 @@ clearAllBtn.addEventListener('click', async () => {
         const bookmarks = data[INVALID_BOOKMARKS_KEY] || [];
 
         let deletedCount = 0;
+        let failedCount = 0;
+
         for (const bm of bookmarks) {
             try {
-                await chrome.bookmarks.remove(bm.id);
+                await new Promise((resolve, reject) => {
+                    chrome.bookmarks.remove(bm.id, () => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
                 deletedCount++;
             } catch (err) {
                 console.error('Failed to remove bookmark:', bm.id, err);
+                failedCount++;
             }
         }
 
         // Clear storage after attempting deletion
         await chrome.storage.local.set({ [INVALID_BOOKMARKS_KEY]: [] });
+
+        // Clear UI instantly
+        invalidList.innerHTML = '';
+        invalidCount.textContent = '0';
+        emptyState.classList.remove('hidden');
+        clearAllBtn.classList.add('hidden');
+
         clearAllBtn.disabled = false;
-        alert(`Deleted ${deletedCount} bookmark(s).`);
+
+        if (failedCount > 0) {
+            alert(`Deleted ${deletedCount} bookmark(s). Failed to delete ${failedCount} bookmark(s).`);
+        } else {
+            alert(`Deleted ${deletedCount} bookmark(s).`);
+        }
     }
 });
 
@@ -131,16 +154,40 @@ function renderBookmarks(bookmarks) {
     `;
 
         li.querySelector('.delete-btn').addEventListener('click', async (e) => {
-            e.target.disabled = true;
+            e.preventDefault();
+            e.stopPropagation();
+
+            const btn = e.currentTarget;
+            btn.disabled = true;
+
             try {
-                await chrome.bookmarks.remove(bm.id);
-                // Remove from UI and storage
+                await new Promise((resolve, reject) => {
+                    chrome.bookmarks.remove(bm.id, () => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+
+                // Remove from UI and storage only after successful deletion
                 const newData = bookmarks.filter(b => b.id !== bm.id);
                 await chrome.storage.local.set({ [INVALID_BOOKMARKS_KEY]: newData });
+
+                // Remove the list item from DOM instantly
+                li.remove();
+
+                // Update count header
+                invalidCount.textContent = newData.length;
+                if (newData.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    clearAllBtn.classList.add('hidden');
+                }
             } catch (err) {
                 console.error('Failed to remove bookmark:', err);
-                alert('Could not remove bookmark. It might have already been deleted.');
-                e.target.disabled = false;
+                alert(`Could not remove bookmark: ${err.message || 'It might have already been deleted.'}`);
+                btn.disabled = false;
             }
         });
 
