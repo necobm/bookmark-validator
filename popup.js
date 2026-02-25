@@ -206,11 +206,11 @@ function renderBookmarks(bookmarks) {
 
         deleteBtn.addEventListener('click', async (event) => {
             const target = event.currentTarget;
-            if (target instanceof HTMLButtonElement) {
-                target.disabled = true;
-            } else {
-                deleteBtn.disabled = true;
+            if (!(target instanceof HTMLButtonElement)) {
+                return;
             }
+
+            target.disabled = true;
             try {
                 await new Promise((resolve, reject) => {
                     chrome.bookmarks.remove(bm.id, () => {
@@ -238,11 +238,7 @@ function renderBookmarks(bookmarks) {
             } catch (err) {
                 console.error('Failed to remove bookmark:', err);
                 alert('Could not remove bookmark. It might have already been deleted.');
-                if (target instanceof HTMLButtonElement) {
-                    target.disabled = false;
-                } else {
-                    deleteBtn.disabled = false;
-                }
+                target.disabled = false;
             }
         });
 
