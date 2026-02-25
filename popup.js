@@ -169,7 +169,36 @@ function renderBookmarks(bookmarks) {
         deleteBtn.className = 'delete-btn';
         deleteBtn.dataset.id = bm.id;
         deleteBtn.title = 'Remove Bookmark';
-        deleteBtn.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
+        const svgNS = 'http://www.w3.org/2000/svg';
+        const svgIcon = document.createElementNS(svgNS, 'svg');
+        svgIcon.setAttribute('width', '16');
+        svgIcon.setAttribute('height', '16');
+        svgIcon.setAttribute('viewBox', '0 0 24 24');
+        svgIcon.setAttribute('fill', 'none');
+        svgIcon.setAttribute('stroke', 'currentColor');
+        svgIcon.setAttribute('stroke-width', '2');
+        svgIcon.setAttribute('stroke-linecap', 'round');
+        svgIcon.setAttribute('stroke-linejoin', 'round');
+
+        const path1 = document.createElementNS(svgNS, 'path');
+        path1.setAttribute('d', 'M3 6h18');
+        const path2 = document.createElementNS(svgNS, 'path');
+        path2.setAttribute('d', 'M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6');
+        const path3 = document.createElementNS(svgNS, 'path');
+        path3.setAttribute('d', 'M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2');
+        const line1 = document.createElementNS(svgNS, 'line');
+        line1.setAttribute('x1', '10');
+        line1.setAttribute('y1', '11');
+        line1.setAttribute('x2', '10');
+        line1.setAttribute('y2', '17');
+        const line2 = document.createElementNS(svgNS, 'line');
+        line2.setAttribute('x1', '14');
+        line2.setAttribute('y1', '11');
+        line2.setAttribute('x2', '14');
+        line2.setAttribute('y2', '17');
+
+        svgIcon.append(path1, path2, path3, line1, line2);
+        deleteBtn.appendChild(svgIcon);
 
         deleteBtn.addEventListener('click', async () => {
             deleteBtn.disabled = true;
