@@ -185,7 +185,7 @@ function renderBookmarks(bookmarks) {
         const linkEl = document.createElement('a');
         linkEl.href = bm.url;
         linkEl.target = '_blank';
-        linkEl.rel = 'noopener';
+        linkEl.rel = 'noopener noreferrer';
         linkEl.className = 'bookmark-url';
         linkEl.title = bm.url;
         linkEl.textContent = bm.url;
@@ -204,8 +204,13 @@ function renderBookmarks(bookmarks) {
         deleteBtn.title = 'Remove Bookmark';
         deleteBtn.appendChild(createDeleteIcon());
 
-        deleteBtn.addEventListener('click', async (_event) => {
-            deleteBtn.disabled = true;
+        deleteBtn.addEventListener('click', async (event) => {
+            const target = event.currentTarget;
+            if (target instanceof HTMLButtonElement) {
+                target.disabled = true;
+            } else {
+                deleteBtn.disabled = true;
+            }
             try {
                 await new Promise((resolve, reject) => {
                     chrome.bookmarks.remove(bm.id, () => {
@@ -233,7 +238,11 @@ function renderBookmarks(bookmarks) {
             } catch (err) {
                 console.error('Failed to remove bookmark:', err);
                 alert('Could not remove bookmark. It might have already been deleted.');
-                deleteBtn.disabled = false;
+                if (target instanceof HTMLButtonElement) {
+                    target.disabled = false;
+                } else {
+                    deleteBtn.disabled = false;
+                }
             }
         });
 
