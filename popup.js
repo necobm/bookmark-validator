@@ -79,7 +79,6 @@ dismissedToggle.addEventListener('click', () => {
     const expanded = dismissedToggle.getAttribute('aria-expanded') === 'true';
     dismissedToggle.setAttribute('aria-expanded', String(!expanded));
     dismissedList.classList.toggle('hidden', expanded);
-    dismissedToggle.querySelector('.toggle-arrow').textContent = expanded ? '▶' : '▼';
 });
 
 clearAllBtn.addEventListener('click', async () => {

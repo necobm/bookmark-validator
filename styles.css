@@ -231,10 +231,6 @@ button:disabled {
   color: var(--primary-color);
 }
 
-.dismissed-container {
-  border-top: 1px solid var(--border-color);
-}
-
 .dismissed-toggle {
   width: 100%;
   background-color: var(--bg-secondary);
@@ -242,20 +238,14 @@ button:disabled {
   padding: 0.5rem 1rem;
   text-align: left;
   font-size: 1rem;
-  font-weight: 500;
+  font-weight: bold;
   border-radius: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
 }
 
 .dismissed-toggle:hover {
   background-color: var(--border-color);
-}
-
-.toggle-arrow {
-  font-size: 0.75rem;
-  color: var(--text-muted);
 }
 
 .empty-state {
