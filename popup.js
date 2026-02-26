@@ -1,5 +1,6 @@
 const SETTINGS_KEY = 'validator_settings';
 const INVALID_BOOKMARKS_KEY = 'invalid_bookmarks';
+const DISMISSED_BOOKMARKS_KEY = 'dismissed_bookmarks';
 const IS_CHECKING_KEY = 'is_checking';
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -12,10 +13,13 @@ const invalidList = document.getElementById('invalid-list');
 const invalidCount = document.getElementById('invalid-count');
 const emptyState = document.getElementById('empty-state');
 const clearAllBtn = document.getElementById('clear-all-btn');
+const dismissedToggle = document.getElementById('dismissed-toggle');
+const dismissedList = document.getElementById('dismissed-list');
+const dismissedCount = document.getElementById('dismissed-count');
 
 // Load initial state
 document.addEventListener('DOMContentLoaded', async () => {
-    const data = await chrome.storage.local.get([INVALID_BOOKMARKS_KEY, IS_CHECKING_KEY]);
+    const data = await chrome.storage.local.get([INVALID_BOOKMARKS_KEY, DISMISSED_BOOKMARKS_KEY, IS_CHECKING_KEY]);
 
     if (data[IS_CHECKING_KEY]) {
         setCheckingState(true);
@@ -24,6 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     renderBookmarks(data[INVALID_BOOKMARKS_KEY] || []);
+    renderDismissedBookmarks(data[DISMISSED_BOOKMARKS_KEY] || []);
 });
 
 // Listen for storage changes to update UI dynamically
@@ -34,6 +39,9 @@ chrome.storage.onChanged.addListener((changes, areaName) => {
         }
         if (changes[INVALID_BOOKMARKS_KEY]) {
             renderBookmarks(changes[INVALID_BOOKMARKS_KEY].newValue || []);
+        }
+        if (changes[DISMISSED_BOOKMARKS_KEY]) {
+            renderDismissedBookmarks(changes[DISMISSED_BOOKMARKS_KEY].newValue || []);
         }
     }
 });
@@ -65,6 +73,12 @@ checkBtn.addEventListener('click', () => {
 
 settingsBtn.addEventListener('click', () => {
     chrome.runtime.openOptionsPage();
+});
+
+dismissedToggle.addEventListener('click', () => {
+    const expanded = dismissedToggle.getAttribute('aria-expanded') === 'true';
+    dismissedToggle.setAttribute('aria-expanded', String(!expanded));
+    dismissedList.classList.toggle('hidden', expanded);
 });
 
 clearAllBtn.addEventListener('click', async () => {
@@ -124,6 +138,32 @@ function setCheckingState(isChecking) {
         statusContainer.classList.add('hidden');
         progressFill.style.width = '0%';
     }
+}
+
+function createDismissIcon() {
+    const svgIcon = document.createElementNS(SVG_NS, 'svg');
+    svgIcon.setAttribute('width', '16');
+    svgIcon.setAttribute('height', '16');
+    svgIcon.setAttribute('viewBox', '0 0 24 24');
+    svgIcon.setAttribute('fill', 'none');
+    svgIcon.setAttribute('stroke', 'currentColor');
+    svgIcon.setAttribute('stroke-width', '2');
+    svgIcon.setAttribute('stroke-linecap', 'round');
+    svgIcon.setAttribute('stroke-linejoin', 'round');
+
+    const line1 = document.createElementNS(SVG_NS, 'line');
+    line1.setAttribute('x1', '18');
+    line1.setAttribute('y1', '6');
+    line1.setAttribute('x2', '6');
+    line1.setAttribute('y2', '18');
+    const line2 = document.createElementNS(SVG_NS, 'line');
+    line2.setAttribute('x1', '6');
+    line2.setAttribute('y1', '6');
+    line2.setAttribute('x2', '18');
+    line2.setAttribute('y2', '18');
+
+    svgIcon.append(line1, line2);
+    return svgIcon;
 }
 
 function createDeleteIcon() {
@@ -238,8 +278,115 @@ function renderBookmarks(bookmarks) {
             }
         });
 
+        const dismissBtn = document.createElement('button');
+        dismissBtn.className = 'dismiss-btn';
+        dismissBtn.dataset.id = bm.id;
+        dismissBtn.title = 'Dismiss Bookmark';
+        dismissBtn.appendChild(createDismissIcon());
+
+        dismissBtn.addEventListener('click', async (event) => {
+            const target = event.currentTarget;
+            target.disabled = true;
+            try {
+                const data = await chrome.storage.local.get([INVALID_BOOKMARKS_KEY, DISMISSED_BOOKMARKS_KEY]);
+                const newInvalid = (data[INVALID_BOOKMARKS_KEY] || []).filter(b => b.id !== bm.id);
+                const existingDismissed = data[DISMISSED_BOOKMARKS_KEY] || [];
+                const alreadyDismissed = existingDismissed.some(b => b.id === bm.id);
+                const newDismissed = alreadyDismissed ? existingDismissed : [...existingDismissed, bm];
+                await chrome.storage.local.set({
+                    [INVALID_BOOKMARKS_KEY]: newInvalid,
+                    [DISMISSED_BOOKMARKS_KEY]: newDismissed
+                });
+
+                li.remove();
+                invalidCount.textContent = newInvalid.length;
+                if (newInvalid.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    clearAllBtn.classList.add('hidden');
+                }
+            } catch (err) {
+                console.error('Failed to dismiss bookmark:', err);
+                target.disabled = false;
+            }
+        });
+
         li.appendChild(infoDiv);
+        li.appendChild(dismissBtn);
         li.appendChild(deleteBtn);
         invalidList.appendChild(li);
+    });
+}
+
+function renderDismissedBookmarks(bookmarks) {
+    dismissedList.innerHTML = '';
+    dismissedCount.textContent = bookmarks.length;
+
+    if (bookmarks.length === 0) {
+        return;
+    }
+
+    bookmarks.forEach(bm => {
+        const li = document.createElement('li');
+        li.className = 'bookmark-item';
+
+        const infoDiv = document.createElement('div');
+        infoDiv.className = 'bookmark-info';
+
+        const titleEl = document.createElement('h3');
+        titleEl.title = bm.title || bm.url;
+        titleEl.textContent = bm.title || 'Untitled';
+
+        const linkEl = document.createElement('a');
+        linkEl.href = bm.url;
+        linkEl.target = '_blank';
+        linkEl.rel = 'noopener noreferrer';
+        linkEl.className = 'bookmark-url';
+        linkEl.title = bm.url;
+        linkEl.textContent = bm.url;
+
+        const reasonEl = document.createElement('span');
+        reasonEl.className = 'bookmark-error';
+        reasonEl.textContent = bm.reason || 'Error';
+
+        infoDiv.appendChild(titleEl);
+        infoDiv.appendChild(linkEl);
+        infoDiv.appendChild(reasonEl);
+
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.dataset.id = bm.id;
+        deleteBtn.title = 'Remove Bookmark';
+        deleteBtn.appendChild(createDeleteIcon());
+
+        deleteBtn.addEventListener('click', async (event) => {
+            const target = event.currentTarget;
+            target.disabled = true;
+            try {
+                await new Promise((resolve, reject) => {
+                    chrome.bookmarks.remove(bm.id, () => {
+                        if (chrome.runtime.lastError) {
+                            reject(new Error(chrome.runtime.lastError.message));
+                        } else {
+                            resolve();
+                        }
+                    });
+                });
+
+                const data = await chrome.storage.local.get(DISMISSED_BOOKMARKS_KEY);
+                const newDismissed = (data[DISMISSED_BOOKMARKS_KEY] || []).filter(b => b.id !== bm.id);
+                await chrome.storage.local.set({ [DISMISSED_BOOKMARKS_KEY]: newDismissed });
+
+                li.remove();
+                dismissedCount.textContent = newDismissed.length;
+            } catch (err) {
+                console.error('Failed to remove dismissed bookmark:', err);
+                alert('Could not remove bookmark. It might have already been deleted.');
+                target.disabled = false;
+            }
+        });
+
+        li.appendChild(infoDiv);
+        li.appendChild(deleteBtn);
+        dismissedList.appendChild(li);
     });
 }

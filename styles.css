@@ -219,6 +219,35 @@ button:disabled {
   color: var(--danger-color);
 }
 
+.dismiss-btn {
+  background: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  padding: 0.5rem;
+  margin-right: 0.25rem;
+}
+
+.dismiss-btn:hover {
+  color: var(--primary-color);
+}
+
+.dismissed-toggle {
+  width: 100%;
+  background-color: var(--bg-secondary);
+  color: var(--text-main);
+  padding: 0.5rem 1rem;
+  text-align: left;
+  font-size: 1rem;
+  font-weight: bold;
+  border-radius: 0;
+  border-top: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.dismissed-toggle:hover {
+  background-color: var(--border-color);
+}
+
 .empty-state {
   display: flex;
   flex-direction: column;
