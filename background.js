@@ -88,11 +88,49 @@ async function getAllBookmarks() {
   return allUrls;
 }
 
+// Check if the device has internet connectivity
+async function hasInternetConnection() {
+  // First check the navigator.onLine property
+  if (!navigator.onLine) {
+    return false;
+  }
+
+  // Perform a quick connectivity test with a reliable endpoint
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5s timeout
+
+    const response = await fetch('https://www.google.com/favicon.ico', {
+      method: 'HEAD',
+      cache: 'no-cache',
+      signal: controller.signal
+    });
+
+    clearTimeout(timeoutId);
+    return response.ok;
+  } catch (error) {
+    return false;
+  }
+}
+
 // Keep track of the current check to prevent multiple concurrent checks
 let isCheckingLocal = false;
 
 async function startValidation() {
   if (isCheckingLocal) return;
+
+  // Check internet connectivity before starting validation
+  const isOnline = await hasInternetConnection();
+  if (!isOnline) {
+    chrome.notifications.create({
+      type: 'basic',
+      iconUrl: 'icons/icon48.png',
+      title: 'No Internet Connection',
+      message: 'Cannot validate bookmarks without an internet connection. Please check your network and try again.'
+    });
+    chrome.runtime.sendMessage({ action: 'VALIDATION_FAILED', reason: 'no_internet' }).catch(() => { });
+    return;
+  }
 
   isCheckingLocal = true;
   await chrome.storage.local.set({ [IS_CHECKING_KEY]: true });
