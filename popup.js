@@ -54,6 +54,11 @@ chrome.runtime.onMessage.addListener((message) => {
         progressFill.style.width = `${percentage}%`;
     } else if (message.action === 'VALIDATION_COMPLETED') {
         setCheckingState(false);
+    } else if (message.action === 'VALIDATION_FAILED') {
+        setCheckingState(false);
+        if (message.reason === 'no_internet') {
+            statusText.textContent = 'No internet connection';
+        }
     }
 });
 
